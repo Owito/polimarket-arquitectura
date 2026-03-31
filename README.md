@@ -1,40 +1,40 @@
-## Estado del proyecto
+# PoliMarket - Arquitectura de Componentes Distribuidos 🛒⚙️
 
-Este repositorio contiene un ejemplo sencillo de arquitectura para **PoliMarket** con tres piezas principales:
+Este repositorio contiene el código fuente y la documentación de diseño para el caso de estudio **PoliMarket**, desarrollado como parte de la Actividad Nro. 2 para la maestría en Arquitectura de Software del Politécnico Grancolombiano.
 
-- **backend-go/**: API en Go con datos en memoria. Expone endpoints de demostración:
-  - `GET /hr/autorizar`
-  - `GET /ventas/catalogo`
-  - `GET /bodega/stock`
-  - `POST /proveedores/compra`
-  - `GET /entregas/pendientes`
-- **cliente-cli-rust/**: cliente de línea de comandos (Rust) que consulta `/entregas/pendientes` y `/bodega/stock` contra `http://localhost:8080`.
-- **cliente-web/**: página HTML que permite probar `/hr/autorizar` y `/ventas/catalogo`. **Reemplaza `API_URL` en el script por la URL del backend desplegado** (por ejemplo, en Render).
-- **docs/**: diagramas PlantUML de clases y componentes.
-- **render.yaml**: configuración para desplegar el backend en Render.
+El proyecto implementa un modelo de diseño basado en componentes, separando estrictamente la capa de presentación (cliente) de la capa lógica de negocio (servicios core), garantizando alta cohesión, bajo acoplamiento y facilitando la reutilización de software.
 
-### Ejecución rápida
+## 🏗️ Arquitectura del Sistema
 
-1) **Backend**:  
-   ```bash
-   cd backend-go
-   go run main.go
-   ```
+El sistema está dividido en dos capas principales que se comunican a través de una API RESTful:
 
-2) **CLI** (requiere backend activo en `:8080`):  
-   ```bash
-   cd cliente-cli-rust
-   cargo run
-   ```
+1. **Capa de Negocio (Backend):** Desarrollada en **Go**, expone las funcionalidades centrales de las diferentes áreas de negocio de la empresa (Recursos Humanos, Ventas, Bodega, Proveedores y Entregas).
+2. **Capa de Clientes (Frontend):** Desarrollada en **HTML5 y Vanilla JavaScript**, actúa como la terminal interactiva para el área de Ventas, consumiendo los servicios expuestos por el backend de manera asíncrona.
 
-3) **Web**: abre `cliente-web/index.html` en el navegador tras ajustar `API_URL`.
+### Requisitos Funcionales Implementados (5)
+De acuerdo con las reglas de negocio establecidas, el sistema cubre los siguientes flujos operativos:
+* **Req 1 (RRHH):** Autorización de vendedores en el sistema.
+* **Req 2 (Ventas):** Consulta del catálogo de productos y listado de clientes.
+* **Req 3 (Bodega):** Verificación de disponibilidad y stock de productos.
+* **Req 4 (Proveedores):** Registro de compras y reabastecimiento de inventario.
+* **Req 5 (Entregas):** Consulta de despachos pendientes cruzando información de ventas.
 
-### Estado actual y pruebas
+## 🛠️ Stack Tecnológico
 
-- Backend operativo con datos de ejemplo y CORS habilitado para pruebas.
-- Clientes (CLI y web) preparados para consumir la API; el web requiere definir `API_URL`.
-- Sin base de datos ni autenticación real (solo mocks).
-- Pruebas ejecutadas en esta rama:
-  - `backend-go`: `go test ./...` (sin archivos de prueba, pasa).
-  - `cliente-cli-rust`: `cargo test` (0 tests, compila correctamente).
+* **Backend:** Go (Golang) usando la librería estándar `net/http`.
+* **Frontend:** HTML5, Vanilla JavaScript (Fetch API).
+* **Diseño UML:** PlantUML (exportado a formato estricto UML 2.5).
 
+## 📂 Estructura del Repositorio
+
+```text
+polimarket-arquitectura/
+├── backend-go/                # Capa de negocio (API REST en Go)
+│   ├── main.go                # Endpoints y lógica de componentes simulada
+│   └── go.mod                 # Definición del módulo
+├── cliente-web/               # Capa de cliente (Terminal de Ventas)
+│   └── index.html             # Interfaz de usuario e integración con API
+├── docs/                      # Entregables de diseño (Exportados en formato BMP)
+│   ├── diagrama_clases.bmp    # Modelo de datos UML 2.5
+│   └── diagrama_componentes.bmp # Modelo de componentes y fachadas UML 2.5
+└── README.md                  # Documentación del proyecto
