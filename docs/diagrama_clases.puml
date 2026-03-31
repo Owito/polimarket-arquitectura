@@ -1,0 +1,58 @@
+@startuml Diagrama_de_Clases_PoliMarket
+
+package "PoliMarket Models" {
+
+    class Vendedor {
+        + id: String
+        + nombre: String
+        + sucursal: String
+        + autorizar()
+    }
+
+    class EmpleadoRH {
+        + id: String
+        + nombre: String
+        + rutt: String
+        + aprobarVendedor(v: Vendedor)
+    }
+
+    class Cliente {
+        + id: String
+        + nombre: String
+    }
+
+    class Producto {
+        + id: String
+        + nombre: String
+        + precio: Double
+    }
+
+    class Proveedor {
+        + id: String
+        + empresa: String
+        + registrarCompra()
+    }
+
+    class OrdenVenta {
+        + id: String
+        + fecha: Date
+        + total: Double
+        + generarFactura()
+    }
+
+    class Despacho {
+        + idEstado: String
+        + detalle: String
+        + actualizarEstado()
+    }
+
+}
+
+Cliente "1" -- "0..*" OrdenVenta : "realiza"
+Vendedor "1" -- "0..*" OrdenVenta : "gestiona"
+OrdenVenta "1" *-- "1..*" Producto : "contiene"
+OrdenVenta "1" -- "1" Despacho : "genera"
+EmpleadoRH "1" -- "0..*" Vendedor : "autoriza"
+Proveedor "1" -- "0..*" Producto : "abastece"
+
+@enduml

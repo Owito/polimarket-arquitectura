@@ -1,0 +1,31 @@
+@startuml Diagrama_Componentes_PoliMarket
+
+skinparam componentStyle uml2
+
+package "Capa de Clientes" {
+    [ClienteRH] <<Web / Desktop>>
+    [TerminalVentas] <<Web>>
+    [AppBodega] <<CLI / Móvil>>
+    [TrackerEntregas] <<CLI>>
+}
+
+node "Capa de Negocio (Backend Go)" {
+    [HRManager] <<Microservicio / Módulo>>
+    [SalesManager] <<Microservicio / Módulo>>
+    [InventoryManager] <<Microservicio / Módulo>>
+    [SupplierManager] <<Microservicio / Módulo>>
+    [DeliveryManager] <<Microservicio / Módulo>>
+}
+
+' Relaciones de comunicación / Endpoints
+[TerminalVentas] ..> [HRManager] : "GET /hr/autorizar"
+[TerminalVentas] ..> [SalesManager] : "GET /ventas/catalogo"
+
+[AppBodega] ..> [InventoryManager] : "GET /bodega/stock"
+
+[TrackerEntregas] ..> [DeliveryManager] : "GET /entregas/pendientes"
+
+' Interacciones con proveedores (ej. backend automatizado)
+[SupplierManager] <.. [InventoryManager] : "POST /proveedores/compra"
+
+@enduml
