@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: polimarket-backend
+    env: go
+    rootDir: backend-go
+    buildCommand: go build -o main main.go
+    startCommand: ./main

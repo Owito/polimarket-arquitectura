@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 // Tipos base para simulación de base de datos
@@ -97,8 +98,12 @@ func main() {
 		})
 	})
 
-	log.Println("Server running on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Server running on port %s...\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
 func enableCORS(w http.ResponseWriter) {

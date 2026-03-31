@@ -259,8 +259,9 @@
     </div>
 
     <script>
+        // IMPORTANTE: Reemplazar aquí con la URL final de Render (ej. https://polimarket-backend.onrender.com)
+        const API_URL = "URL_RENDER_AQUI";
         const resultadoDiv = document.getElementById('resultado');
-        const API_BASE_URL = 'http://localhost:8080';
 
         function showLoading() {
             resultadoDiv.innerHTML = '<div class="loader-container"><div class="loader"></div><div style="color:var(--text-muted); margin-top:10px;">Conectando al servidor...</div></div>';
@@ -278,7 +279,7 @@
         document.getElementById('btnAutorizar').addEventListener('click', async () => {
             try {
                 showLoading();
-                const res = await fetch(`${API_BASE_URL}/hr/autorizar`);
+                const res = await fetch(`${API_URL}/hr/autorizar`);
                 const data = await res.json();
                 
                 if (data.autorizado) {
@@ -298,7 +299,7 @@
         document.getElementById('btnCatalogo').addEventListener('click', async () => {
             try {
                 showLoading();
-                const res = await fetch(`${API_BASE_URL}/ventas/catalogo`);
+                const res = await fetch(`${API_URL}/ventas/catalogo`);
                 const data = await res.json();
                 
                 let htmlContent = '';
