@@ -30,6 +30,24 @@ Se aplica el patrón **GoF Factory Method** para encapsular la creación del val
 ### 3) Evidencia en el código
 Se creó una interfaz `StockValidator`, su implementación `DefaultStockValidator` y un método de fábrica `NewStockValidator`, utilizado por el endpoint `POST /bodega/validar`.
 
+**Ejemplo de uso del endpoint `POST /bodega/validar`:**
+
+```bash
+curl -X POST http://localhost:8080/bodega/validar \
+  -H "Content-Type: application/json" \
+  -d '{"id_producto":"P1","cantidad":2}'
+```
+
+**Respuesta esperada:**
+
+```json
+{
+  "disponible": true,
+  "stock_actual": 15,
+  "mensaje": "Stock disponible"
+}
+```
+
 ### 4) Documento breve
 El documento breve queda representado en esta sección del README y sirve para publicación en el foro del curso.
 
