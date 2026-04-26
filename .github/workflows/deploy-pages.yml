@@ -24,13 +24,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cliente-web-angular/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./cliente-web-angular
+
+      - name: Build Angular app
+        run: npm run build -- --base-href=/polimarket-arquitectura/
+        working-directory: ./cliente-web-angular
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+            
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './cliente-web'
+          path: './cliente-web-angular/dist/cliente-web-angular/browser'
           
       - name: Deploy to GitHub Pages
         id: deployment
