@@ -7,3 +7,16 @@ target/
 
 # Windows
 *.exe
+
+# Node / frontend dependencies
+node_modules/
+
+# Local session artifacts
+session-ses_*.md
+
+# Nested cloned repository
+polimarket-arquitectura/
+
+# Root-only Node setup files
+package.json
+package-lock.json
