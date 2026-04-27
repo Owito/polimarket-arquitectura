@@ -1,4 +1,4 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Cliente, Producto, ValidacionStock, Despacho } from './core/services/api.service';
@@ -22,9 +22,8 @@ interface Toast {
   template: `
     <div class="app-container" [class.light-mode]="!darkMode()">
       <div class="toast-container">
-      <div class="toast-container">
         @for (toast of toasts(); track toast.id) {
-          <div class="toast" [class]="'toast-' + toast.type">
+          <div [class]="'toast toast-' + toast.type">
             <span class="toast-icon">
               <span *ngIf="toast.type === 'success'">OK</span>
               <span *ngIf="toast.type === 'error'">X</span>
@@ -37,6 +36,18 @@ interface Toast {
 
       @if (!isLoggedIn()) {
         <div class="login-screen">
+          <button
+            type="button"
+            class="theme-toggle login-theme-toggle"
+            (click)="toggleTheme()"
+            [title]="darkMode() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+            @if (darkMode()) {
+              <span class="theme-icon">☀️</span>
+            } @else {
+              <span class="theme-icon">🌙</span>
+            }
+          </button>
+
           <div class="login-bg-effects">
             <div class="bg-orb bg-orb-1"></div>
             <div class="bg-orb bg-orb-2"></div>
@@ -81,11 +92,22 @@ interface Toast {
 
       @if (isLoggedIn()) {
         <div class="main-layout">
-          <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+          @if (isMobile() && sidebarOpen()) {
+            <button
+              type="button"
+              class="sidebar-backdrop"
+              aria-label="Cerrar menu lateral"
+              (click)="closeSidebarMobile()"></button>
+          }
+
+          <aside
+            class="sidebar"
+            [class.collapsed]="!isMobile() && sidebarCollapsed()"
+            [class.mobile-open]="isMobile() && sidebarOpen()">
             <div class="sidebar-header">
-              <div class="sidebar-brand" (click)="sidebarCollapsed.set(!sidebarCollapsed())">
+              <div class="sidebar-brand" (click)="toggleSidebarState()">
                 <span class="sidebar-logo">🛒</span>
-                @if (!sidebarCollapsed()) {
+                @if (!shouldHideSidebarText()) {
                   <span class="sidebar-title">PoliMarket</span>
                 }
               </div>
@@ -97,7 +119,7 @@ interface Toast {
                   [class.active]="activeTab() === item.id"
                   (click)="setActiveTab(item.id)">
                   <span class="nav-icon">{{ item.icon }}</span>
-                  @if (!sidebarCollapsed()) {
+                  @if (!shouldHideSidebarText()) {
                     <span class="nav-label">{{ item.label }}</span>
                   }
                 </button>
@@ -107,7 +129,7 @@ interface Toast {
             <div class="sidebar-footer">
               <div class="user-info">
                 <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
-                @if (!sidebarCollapsed()) {
+                @if (!shouldHideSidebarText()) {
                   <div class="user-details">
                     <span class="user-name">{{ username }}</span>
                     <span class="user-role">Vendedor</span>
@@ -116,16 +138,26 @@ interface Toast {
               </div>
               <button class="btn-logout" (click)="logout()">
                 <span>🚪</span>
-                @if (!sidebarCollapsed()) { <span>Salir</span> }
+                @if (!shouldHideSidebarText()) { <span>Salir</span> }
               </button>
             </div>
           </aside>
 
-          <main class="content" [style.margin-left]="sidebarCollapsed() ? '72px' : '260px'">
+          <main class="content" [class.sidebar-collapsed]="!isMobile() && sidebarCollapsed()">
             <header class="content-header">
               <div class="header-left">
-                <h1 class="page-title">{{ getPageTitle() }}</h1>
-                <p class="page-subtitle">{{ getPageSubtitle() }}</p>
+                @if (isMobile()) {
+                  <button
+                    type="button"
+                    class="mobile-menu-button"
+                    aria-label="Abrir menu lateral"
+                    (click)="toggleSidebarState()">☰</button>
+                }
+
+                <div>
+                  <h1 class="page-title">{{ getPageTitle() }}</h1>
+                  <p class="page-subtitle">{{ getPageSubtitle() }}</p>
+                </div>
               </div>
               <div class="header-right">
                 <div class="header-date">📅 {{ currentDate }}</div>
@@ -496,7 +528,7 @@ interface Toast {
     .toast-error { background: rgba(239, 68, 68, 0.9); color: white; }
     .toast-info { background: rgba(59, 130, 246, 0.9); color: white; }
 
-    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 24px; }
     .login-bg-effects { position: absolute; inset: 0; overflow: hidden; }
     .bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; }
     .bg-orb-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; right: -100px; animation: float 8s ease-in-out infinite; }
@@ -521,10 +553,12 @@ interface Toast {
     .btn-login { background: var(--gradient-primary); border: none; border-radius: 12px; padding: 16px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(244, 63, 94, 0.3); }
     .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(244, 63, 94, 0.4); }
     .login-footer { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 12px; }
+    .login-theme-toggle { position: absolute; top: 20px; right: 20px; z-index: 4; backdrop-filter: blur(10px); }
 
-    .main-layout { display: flex; min-height: 100vh; }
-    .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; transition: width 0.3s ease; position: fixed; height: 100vh; z-index: 100; }
+    .main-layout { display: flex; min-height: 100vh; position: relative; }
+    .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; transition: width 0.3s ease, transform 0.3s ease; position: fixed; top: 0; left: 0; height: 100vh; z-index: 220; }
     .sidebar.collapsed { width: 72px; }
+    .sidebar-backdrop { position: fixed; inset: 0; background: rgba(5, 7, 12, 0.6); border: 0; z-index: 200; }
     .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-subtle); }
     .sidebar-brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .sidebar-logo { font-size: 28px; }
@@ -543,8 +577,12 @@ interface Toast {
     .btn-logout { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
     .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
 
-    .content { flex: 1; padding: 24px 32px; transition: margin-left 0.3s ease; }
+    .content { flex: 1; margin-left: 260px; padding: 24px 32px; transition: margin-left 0.3s ease; }
+    .content.sidebar-collapsed { margin-left: 72px; }
     .content-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+    .header-left { display: flex; align-items: flex-start; gap: 14px; }
+    .mobile-menu-button { width: 38px; height: 38px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); font-size: 19px; font-weight: 700; cursor: pointer; }
+    .mobile-menu-button:hover { border-color: var(--primary); }
     .page-title { font-size: 28px; font-weight: 700; margin: 0; }
     .page-subtitle { color: var(--text-muted); margin: 4px 0 0; }
     .header-date { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; background: var(--bg-card); padding: 8px 16px; border-radius: 8px; }
@@ -673,17 +711,52 @@ interface Toast {
     .btn-continue { background: var(--gradient-primary); border: none; border-radius: 12px; padding: 16px 32px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
     .btn-continue:hover { transform: translateY(-2px); }
 
-    @media (max-width: 768px) {
-      .sidebar { width: 72px; }
-      .sidebar-title, .nav-label, .user-details, .btn-logout span:last-child { display: none; }
-      .content { margin-left: 72px; padding: 16px; }
-      .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
-    }
-
     .theme-toggle { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
     .theme-toggle:hover { border-color: var(--primary); transform: scale(1.05); }
     .theme-icon { font-size: 18px; }
     .header-right { display: flex; align-items: center; gap: 12px; }
+
+    @media (max-width: 1024px) {
+      .content { padding: 20px; }
+      .content-panel { padding: 20px; }
+      .header-date { display: none; }
+      .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stock-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .login-screen { padding: 16px; }
+      .login-card { padding: 28px 20px; border-radius: 20px; }
+      .brand-name { font-size: 28px; }
+      .sidebar { width: min(78vw, 280px); transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .content, .content.sidebar-collapsed { margin-left: 0; padding: 16px; }
+      .content-header { flex-direction: column; gap: 12px; align-items: stretch; margin-bottom: 22px; }
+      .header-right { justify-content: flex-end; }
+      .dashboard-stats { grid-template-columns: 1fr; }
+      .panel-grid { gap: 16px; }
+      .products-grid, .loading-skeleton { grid-template-columns: 1fr; }
+      .product-actions { flex-direction: column; }
+      .qty-input { width: 100%; }
+      .filter-tabs { flex-wrap: wrap; }
+      .delivery-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .validation-result { flex-direction: column; align-items: flex-start; }
+      .toast-container { left: 12px; right: 12px; top: 12px; }
+      .toast { width: 100%; }
+      .panel-center { padding: 24px 10px; }
+      .user-card { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .content-panel { padding: 16px; border-radius: 16px; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .cart-item { flex-wrap: wrap; }
+      .cart-item-price { width: 100%; }
+      .btn-checkout, .btn-purchase, .btn-validate { width: 100%; }
+      .validate-select, .validate-input { min-width: 100%; }
+      .theme-toggle { padding: 8px 10px; }
+    }
   `]
 })
 export class AppComponent {
@@ -691,6 +764,8 @@ export class AppComponent {
   
   darkMode = signal(localStorage.getItem('theme') !== 'light');
   sidebarCollapsed = signal(false);
+  isMobile = signal(window.innerWidth <= 768);
+  sidebarOpen = signal(false);
   isLoggedIn = signal(false);
   activeTab = signal('auth');
   loading = signal(false);
@@ -740,6 +815,34 @@ export class AppComponent {
 
   constructor(private api: ApiService) {}
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    const mobile = window.innerWidth <= 768;
+    this.isMobile.set(mobile);
+    if (!mobile) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
+  shouldHideSidebarText(): boolean {
+    return this.isMobile() || this.sidebarCollapsed();
+  }
+
+  toggleSidebarState() {
+    if (this.isMobile()) {
+      this.sidebarOpen.set(!this.sidebarOpen());
+      return;
+    }
+    this.sidebarCollapsed.set(!this.sidebarCollapsed());
+  }
+
+  closeSidebarMobile() {
+    if (!this.isMobile()) {
+      return;
+    }
+    this.sidebarOpen.set(false);
+  }
+
   getPageTitle(): string {
     const titles: Record<string, string> = { 'auth': 'Panel de Control', 'ventas': 'Módulo de Ventas', 'bodega': 'Gestión de Bodega', 'proveedores': 'Proveedores', 'entregas': 'Control de Entregas' };
     return titles[this.activeTab()] || 'PoliMarket';
@@ -770,6 +873,9 @@ export class AppComponent {
 
   setActiveTab(tab: string) {
     this.activeTab.set(tab);
+    if (this.isMobile()) {
+      this.sidebarOpen.set(false);
+    }
   }
 
   toggleTheme() {
