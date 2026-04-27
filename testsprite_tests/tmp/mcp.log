@@ -1,0 +1,5 @@
+{"timestamp":"2026-04-27T10:48:47.116Z","level":"info","message":"Tool invocation started","correlationId":"aefc058a-ae97-4bf4-a35b-e6e9a4a25598","tool":"testsprite_generate_code_summary"}
+{"timestamp":"2026-04-27T10:48:47.164Z","level":"error","message":"readConfig error: Error: ENOENT: no such file or directory, open 'D:\\Polimarket\\testsprite_tests\\tmp\\config.json'","correlationId":"aefc058a-ae97-4bf4-a35b-e6e9a4a25598","tool":"testsprite_generate_code_summary"}
+{"timestamp":"2026-04-27T10:48:47.167Z","level":"info","message":"Tool invocation completed","correlationId":"aefc058a-ae97-4bf4-a35b-e6e9a4a25598","tool":"testsprite_generate_code_summary"}
+{"timestamp":"2026-04-27T10:48:47.160Z","level":"debug","message":"Code analyze params","correlationId":"aefc058a-ae97-4bf4-a35b-e6e9a4a25598","tool":"testsprite_generate_code_summary","context":{"projectRootPath":"D:\\Polimarket"}}
+{"timestamp":"2026-04-27T10:48:47.165Z","level":"info","message":"Scope determined","correlationId":"aefc058a-ae97-4bf4-a35b-e6e9a4a25598","tool":"testsprite_generate_code_summary","context":{}}
