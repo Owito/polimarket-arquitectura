@@ -457,8 +457,8 @@ interface Toast {
       --bg-secondary: #12121a;
       --bg-tertiary: #1a1a24;
       --bg-card: rgba(26, 26, 38, 0.8);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-light: rgba(255, 255, 255, 0.12);
+      --border-subtle: rgba(255, 255, 255, 0.14);
+      --border-light: rgba(255, 255, 255, 0.22);
       --primary: #f43f5e;
       --primary-light: #fb7185;
       --secondary: #6366f1;
@@ -468,7 +468,7 @@ interface Toast {
       --info: #3b82f6;
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
-      --text-muted: #64748b;
+      --text-muted: #7388a3;
       --gradient-primary: linear-gradient(135deg, #f43f5e 0%, #6366f1 100%);
       --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
@@ -687,9 +687,21 @@ interface Toast {
     .delivery-list { display: flex; flex-direction: column; gap: 10px; }
     .delivery-card { display: flex; justify-content: space-between; align-items: center; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; }
     .delivery-detail { margin: 0; }
-    .delivery-status { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .delivery-status { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
     .delivery-status.bg-amber-500 { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
     .delivery-status.bg-blue-500 { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+
+    .app-container:not(.light-mode) .delivery-status.bg-amber-500 {
+      background: rgba(180, 83, 9, 0.42);
+      border-color: rgba(245, 158, 11, 0.55);
+      color: #fef3c7;
+    }
+
+    .app-container:not(.light-mode) .delivery-status.bg-blue-500 {
+      background: rgba(29, 78, 216, 0.42);
+      border-color: rgba(96, 165, 250, 0.55);
+      color: #dbeafe;
+    }
     .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
 
     .loading-skeleton { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
